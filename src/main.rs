@@ -1,39 +1,29 @@
-use std::{env::args, path::PathBuf};
+use clap::{Parser, Subcommand, ValueEnum};
+use mimi_vm::KvmVcpuWrapper;
+use std::path::PathBuf;
 
 mod arm;
-mod registers;
+mod mimi_vm;
 
-use registers::AARCH64_KVM_REGISTERS;
+use arm::AARCH64_KVM_REGISTERS;
 
-fn print_usage_and_exit() -> ! {
-    println!(
-        "Usage: arm_regs <mode> <path>
-where:
-  mode: id/register
-  path: path to file with ids/names"
-    );
-    std::process::exit(1);
-}
-
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 enum Error {
-    Io(std::io::Error),
-    Parse(std::num::ParseIntError),
-}
-
-impl std::error::Error for Error {}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{self:?}")
-    }
+    #[error("Can not read file: {0}: {1}")]
+    FileRead(PathBuf, std::io::Error),
+    #[error("Can not parse value: {0}: {1}")]
+    ParseNum(String, std::num::ParseIntError),
+    #[error("Kvm error: {0}")]
+    Kvm(#[from] mimi_vm::Error),
 }
 
 fn find_by_id(path: PathBuf) -> Result<(), Error> {
-    let content = std::fs::read_to_string(path).map_err(Error::Io)?;
+    let content = std::fs::read_to_string(path.as_path()).map_err(|e| Error::FileRead(path, e))?;
 
     for line in content.lines() {
-        let id = line.parse::<u64>().map_err(Error::Parse)?;
+        let id = line
+            .parse::<u64>()
+            .map_err(|e| Error::ParseNum(line.into(), e))?;
         let regs = AARCH64_KVM_REGISTERS
             .iter()
             .filter(|reg| reg.reg_id == id)
@@ -50,7 +40,7 @@ fn find_by_id(path: PathBuf) -> Result<(), Error> {
 }
 
 fn find_by_register(path: PathBuf) -> Result<(), Error> {
-    let content = std::fs::read_to_string(path).map_err(Error::Io)?;
+    let content = std::fs::read_to_string(path.as_path()).map_err(|e| Error::FileRead(path, e))?;
 
     for line in content.lines() {
         let regs = AARCH64_KVM_REGISTERS
@@ -68,18 +58,41 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum FindMode {
+    Id,
+    Register,
+}
+
+#[derive(Debug, Clone, Subcommand)]
+enum Command {
+    Find {
+        #[arg(short, long)]
+        mode: FindMode,
+        #[arg(short, long)]
+        path: PathBuf,
+    },
+    Query,
+}
+
+#[derive(Parser)]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
 fn main() -> Result<(), Error> {
-    let args = args();
-    if args.len() != 3 {
-        print_usage_and_exit();
-    }
+    let cli = Cli::parse();
 
-    let args = args.into_iter().collect::<Vec<String>>();
-
-    match args[1].as_str() {
-        "id" => find_by_id(args[2].clone().into())?,
-        "register" => find_by_register(args[2].clone().into())?,
-        _ => print_usage_and_exit(),
+    match cli.command {
+        Command::Find { mode, path } => match mode {
+            FindMode::Id => find_by_id(path)?,
+            FindMode::Register => find_by_register(path)?,
+        },
+        Command::Query => {
+            let kvm_vcpu = KvmVcpuWrapper::new()?;
+            println!("{:?}", kvm_vcpu.query_registers()?);
+        }
     }
 
     Ok(())
