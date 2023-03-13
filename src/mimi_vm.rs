@@ -30,7 +30,8 @@ pub struct KvmVcpuWrapper {
 }
 
 impl KvmVcpuWrapper {
-    const REGISTERS_TO_QUERY: usize = 1000;
+    // This is a maximum allowed by kvm_bindings crate
+    const REGISTERS_TO_QUERY: usize = 500;
 
     pub fn new() -> Result<Self, Error> {
         let kvm = Kvm::new().map_err(Error::OpenKvm)?;
@@ -59,7 +60,7 @@ impl KvmVcpuWrapper {
             }
         };
 
-        assert!(Self::REGISTERS_TO_QUERY < reg_list.len());
+        println!("Got reg list size of {}", reg_list.len());
 
         let regs = reg_list
             .iter()
