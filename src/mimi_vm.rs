@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use kvm_bindings::RegList;
 use kvm_ioctls::*;
 
@@ -19,8 +21,17 @@ pub enum Error {
 
 #[derive(Debug)]
 pub struct KvmRegisterQuery {
-    reg_id: u64,
-    register: Option<Aarch64KvmRegister>,
+    pub reg_id: u64,
+    pub register: Option<Aarch64KvmRegister>,
+}
+
+impl Display for KvmRegisterQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.register {
+            Some(reg) => f.write_fmt(format_args!("reg_id: {} => {}", self.reg_id, reg)),
+            None => f.write_fmt(format_args!("reg_id: {} => None", self.reg_id)),
+        }
+    }
 }
 
 pub struct KvmVcpuWrapper {
@@ -50,7 +61,7 @@ impl KvmVcpuWrapper {
         let reg_list = match self.vcpu.get_reg_list(&mut reg_list) {
             Ok(_) => reg_list.as_slice(),
             Err(_) => {
-                // if we fail to get Self::REGISTERS_TO_QUERY then the `n` in reg_list 
+                // if we fail to get Self::REGISTERS_TO_QUERY then the `n` in reg_list
                 // will contain the correct number of registers to query
                 reg_list = RegList::new(reg_list.as_fam_struct_ref().n as usize).unwrap();
                 self.vcpu

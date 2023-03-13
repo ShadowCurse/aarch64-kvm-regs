@@ -91,7 +91,9 @@ fn main() -> Result<(), Error> {
         },
         Command::Query => {
             let kvm_vcpu = KvmVcpuWrapper::new()?;
-            println!("{:?}", kvm_vcpu.query_registers()?);
+            for reg in kvm_vcpu.query_registers()? {
+                println!("{reg}");
+            }
         }
     }
 

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, Clone, Copy)]
 pub enum Access {
     RW,
@@ -17,6 +19,13 @@ pub struct Aarch64KvmRegister {
     pub mnemonic: &'static str,
     pub register: &'static str,
     pub reg_id: u64,
+}
+
+impl Display for Aarch64KvmRegister {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("op0: {}, op1: {}, crn: {}, crm: {}, op2: {}, access: {:?}, mnemonic: {}, register: {}, reg_id: {}",
+                                 self.op0, self.op1, self.crn, self.crm, self.op2, self.access, self.mnemonic, self.register, self.reg_id))
+    }
 }
 
 impl Aarch64KvmRegister {
