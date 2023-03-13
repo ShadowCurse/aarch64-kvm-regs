@@ -1,9 +1,5 @@
-use std::fmt::Display;
-
 use kvm_bindings::RegList;
 use kvm_ioctls::*;
-
-use crate::arm::{Aarch64KvmRegister, AARCH64_KVM_REGISTERS};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -17,21 +13,6 @@ pub enum Error {
     InitVcpu(kvm_ioctls::Error),
     #[error("Can not get reg list: {0}")]
     GetRegList(kvm_ioctls::Error),
-}
-
-#[derive(Debug)]
-pub struct KvmRegisterQuery {
-    pub reg_id: u64,
-    pub register: Option<Aarch64KvmRegister>,
-}
-
-impl Display for KvmRegisterQuery {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.register {
-            Some(reg) => f.write_fmt(format_args!("reg_id: {} => {}", self.reg_id, reg)),
-            None => f.write_fmt(format_args!("reg_id: {} => None", self.reg_id)),
-        }
-    }
 }
 
 pub struct KvmVcpuWrapper {
@@ -56,7 +37,7 @@ impl KvmVcpuWrapper {
         Ok(Self { kvm, vm, vcpu })
     }
 
-    pub fn query_registers(&self) -> Result<Vec<KvmRegisterQuery>, Error> {
+    pub fn query_registers(&self) -> Result<Vec<u64>, Error> {
         let mut reg_list = RegList::new(Self::REGISTERS_TO_QUERY).unwrap();
         let reg_list = match self.vcpu.get_reg_list(&mut reg_list) {
             Ok(_) => reg_list.as_slice(),
@@ -71,18 +52,6 @@ impl KvmVcpuWrapper {
             }
         };
 
-        println!("Got reg list size of {}", reg_list.len());
-
-        let regs = reg_list
-            .iter()
-            .map(|reg_id| KvmRegisterQuery {
-                reg_id: *reg_id,
-                register: AARCH64_KVM_REGISTERS
-                    .iter()
-                    .find(|kvm_reg| kvm_reg.reg_id == *reg_id)
-                    .copied(),
-            })
-            .collect();
-        Ok(regs)
+        Ok(reg_list.into())
     }
 }
