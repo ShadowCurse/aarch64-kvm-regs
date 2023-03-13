@@ -30,7 +30,7 @@ fn find_by_id(path: PathBuf) -> Result<(), Error> {
             .collect::<Vec<_>>();
         if !regs.is_empty() {
             for reg in regs {
-                println!("id: {id} => {reg:?}");
+                println!("id: {id} => {reg}");
             }
         } else {
             println!("id: {id} => None");
@@ -49,7 +49,7 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
             .collect::<Vec<_>>();
         if !regs.is_empty() {
             for reg in regs {
-                println!("register: {line} => {reg:?}");
+                println!("register: {line} => {reg}");
             }
         } else {
             println!("register: {line} => None");
