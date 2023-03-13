@@ -54,4 +54,27 @@ impl KvmVcpuWrapper {
 
         Ok(reg_list.into())
     }
+
+    pub fn query_registers_with_values(&self) -> Result<Vec<(u64, u128)>, Error> {
+        let mut reg_list = RegList::new(Self::REGISTERS_TO_QUERY).unwrap();
+        let reg_list = match self.vcpu.get_reg_list(&mut reg_list) {
+            Ok(_) => reg_list.as_slice(),
+            Err(_) => {
+                // if we fail to get Self::REGISTERS_TO_QUERY then the `n` in reg_list
+                // will contain the correct number of registers to query
+                reg_list = RegList::new(reg_list.as_fam_struct_ref().n as usize).unwrap();
+                self.vcpu
+                    .get_reg_list(&mut reg_list)
+                    .map_err(Error::GetRegList)?;
+                reg_list.as_slice()
+            }
+        };
+
+        let ret = reg_list
+            .iter()
+            .map(|reg_id| (*reg_id, self.vcpu.get_one_reg(*reg_id).unwrap()))
+            .collect();
+
+        Ok(ret)
+    }
 }

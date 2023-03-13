@@ -58,6 +58,58 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
+fn query() -> Result<(), Error> {
+    let kvm_vcpu = KvmVcpuWrapper::new()?;
+    for reg in kvm_vcpu.query_registers()? {
+        println!("{reg}");
+    }
+    Ok(())
+}
+
+fn query_with_values() -> Result<(), Error> {
+    let kvm_vcpu = KvmVcpuWrapper::new()?;
+    for (reg, val) in kvm_vcpu.query_registers_with_values()? {
+        println!("{reg} {val}");
+    }
+    Ok(())
+}
+
+fn query_with_names() -> Result<(), Error> {
+    let kvm_vcpu = KvmVcpuWrapper::new()?;
+    for reg_id in kvm_vcpu.query_registers()? {
+        let regs = AARCH64_KVM_REGISTERS
+            .iter()
+            .filter(|reg| reg.reg_id == reg_id)
+            .collect::<Vec<_>>();
+        if !regs.is_empty() {
+            for reg in regs {
+                println!("{reg_id} {}", reg.register);
+            }
+        } else {
+            println!("{reg_id} none");
+        }
+    }
+    Ok(())
+}
+
+fn query_with_values_and_names() -> Result<(), Error> {
+    let kvm_vcpu = KvmVcpuWrapper::new()?;
+    for (reg_id, val) in kvm_vcpu.query_registers_with_values()? {
+        let regs = AARCH64_KVM_REGISTERS
+            .iter()
+            .filter(|reg| reg.reg_id == reg_id)
+            .collect::<Vec<_>>();
+        if !regs.is_empty() {
+            for reg in regs {
+                println!("{reg_id} {val} {}", reg.register);
+            }
+        } else {
+            println!("{reg_id} {val} none");
+        }
+    }
+    Ok(())
+}
+
 #[derive(Debug, Clone, Copy, ValueEnum)]
 enum FindMode {
     Id,
@@ -72,7 +124,12 @@ enum Command {
         #[arg(short, long)]
         path: PathBuf,
     },
-    Query,
+    Query {
+        #[arg(short, long)]
+        with_values: bool,
+        #[arg(short, long)]
+        with_names: bool,
+    },
 }
 
 #[derive(Parser)]
@@ -89,12 +146,15 @@ fn main() -> Result<(), Error> {
             FindMode::Id => find_by_id(path)?,
             FindMode::Register => find_by_register(path)?,
         },
-        Command::Query => {
-            let kvm_vcpu = KvmVcpuWrapper::new()?;
-            for reg in kvm_vcpu.query_registers()? {
-                println!("{reg}");
-            }
-        }
+        Command::Query {
+            with_values,
+            with_names,
+        } => match (with_values, with_names) {
+            (false, false) => query()?,
+            (true, false) => query_with_values()?,
+            (false, true) => query_with_names()?,
+            (true, true) => query_with_values_and_names()?,
+        },
     }
 
     Ok(())
