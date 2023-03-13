@@ -125,9 +125,9 @@ enum Command {
         path: PathBuf,
     },
     Query {
-        #[arg(short, long)]
+        #[arg(long)]
         with_values: bool,
-        #[arg(short, long)]
+        #[arg(long)]
         with_names: bool,
     },
 }
