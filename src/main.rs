@@ -70,7 +70,7 @@ fn query_with_values(hex: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
     if hex {
         for (reg, val) in kvm_vcpu.query_registers_with_values()? {
-            println!("{reg} {val:#18x}");
+            println!("{reg} {val:#018x}");
         }
     } else {
         for (reg, val) in kvm_vcpu.query_registers_with_values()? {
@@ -108,10 +108,10 @@ fn query_with_values_and_names(hex: bool) -> Result<(), Error> {
         if hex {
             if !regs.is_empty() {
                 for reg in regs {
-                    println!("{reg_id} {val:#18x} {}", reg.register);
+                    println!("{reg_id} {val:#018x} {}", reg.register);
                 }
             } else {
-                println!("{reg_id} {val:#18x} none");
+                println!("{reg_id} {val:#018x} none");
             }
         } else if !regs.is_empty() {
             for reg in regs {
