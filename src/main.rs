@@ -66,10 +66,16 @@ fn query() -> Result<(), Error> {
     Ok(())
 }
 
-fn query_with_values() -> Result<(), Error> {
+fn query_with_values(hex: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
-    for (reg, val) in kvm_vcpu.query_registers_with_values()? {
-        println!("{reg} {val}");
+    if hex {
+        for (reg, val) in kvm_vcpu.query_registers_with_values()? {
+            println!("{reg} {val:x}");
+        }
+    } else {
+        for (reg, val) in kvm_vcpu.query_registers_with_values()? {
+            println!("{reg} {val}");
+        }
     }
     Ok(())
 }
@@ -92,14 +98,22 @@ fn query_with_names() -> Result<(), Error> {
     Ok(())
 }
 
-fn query_with_values_and_names() -> Result<(), Error> {
+fn query_with_values_and_names(hex: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
     for (reg_id, val) in kvm_vcpu.query_registers_with_values()? {
         let regs = AARCH64_KVM_REGISTERS
             .iter()
             .filter(|reg| reg.reg_id == reg_id)
             .collect::<Vec<_>>();
-        if !regs.is_empty() {
+        if hex {
+            if !regs.is_empty() {
+                for reg in regs {
+                    println!("{reg_id} {val:x} {}", reg.register);
+                }
+            } else {
+                println!("{reg_id} {val:x} none");
+            }
+        } else if !regs.is_empty() {
             for reg in regs {
                 println!("{reg_id} {val} {}", reg.register);
             }
@@ -125,10 +139,12 @@ enum Command {
         path: PathBuf,
     },
     Query {
+        #[arg(short, long)]
+        values: bool,
+        #[arg(short, long)]
+        names: bool,
         #[arg(long)]
-        with_values: bool,
-        #[arg(long)]
-        with_names: bool,
+        hex: bool,
     },
 }
 
@@ -146,14 +162,11 @@ fn main() -> Result<(), Error> {
             FindMode::Id => find_by_id(path)?,
             FindMode::Register => find_by_register(path)?,
         },
-        Command::Query {
-            with_values,
-            with_names,
-        } => match (with_values, with_names) {
+        Command::Query { values, names, hex } => match (values, names) {
             (false, false) => query()?,
-            (true, false) => query_with_values()?,
+            (true, false) => query_with_values(hex)?,
             (false, true) => query_with_names()?,
-            (true, true) => query_with_values_and_names()?,
+            (true, true) => query_with_values_and_names(hex)?,
         },
     }
 
