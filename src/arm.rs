@@ -5,6 +5,7 @@ pub enum Access {
     RW,
     RO,
     WO,
+    Unspecified,
 }
 
 #[allow(unused)]
@@ -87,7 +88,7 @@ impl Aarch64KvmRegister {
 
 // Data taken from ARMv8 ARM DDI 0487A / System instruction encodings for non-Debug System register accesses
 #[rustfmt::skip]
-pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
+pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 553] = [
     Aarch64KvmRegister::new(0b11, 0b000, 0b0000, 0b0000, 0b000, Access::RO, "MIDR_EL1", "MIDR_EL1"), 
     Aarch64KvmRegister::new(0b11, 0b000, 0b0000, 0b0000, 0b000, Access::RO, "MIDR_EL1", "VPIDR_EL2"), 
     Aarch64KvmRegister::new(0b11, 0b000, 0b0000, 0b0000, 0b000, Access::RO, "VPIDR_EL2", "MIDR_EL1"), 
@@ -205,11 +206,11 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0000, 0b001, Access::RW, "ELR_EL2", "ELR_EL1"),
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0000, 0b001, Access::RW, "ELR_EL2", "ELR_EL2"),
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0001, 0b000, Access::RW, "SP_EL0", "SP_EL0"),
-    // 11 000 0100 0010 000 - SPSel -
-    // 11 000 0100 0010 010 - CurrentEL -
-    // 11 000 0100 0010 011 - PAN -
-    // 11 000 0100 0010 100 - UAO -
-    // 11 000 0100 0011 000 - ALLINT -
+    Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0010, 0b000, Access::Unspecified, "SPSel", "-"),
+    Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0010, 0b010, Access::Unspecified, "CurrentEL", "-"),
+    Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0010, 0b011, Access::Unspecified, "PAN", "-"),
+    Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0010, 0b100, Access::Unspecified, "UAO", "-"),
+    Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0011, 0b000, Access::Unspecified, "ALLINT", "-"),
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0110, 0b000, Access::RW, "ICC_PMR_EL1", "ICC_PMR_EL1"),
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0110, 0b000, Access::RW, "ICC_PMR_EL1", "ICV_PMR_EL1"),
     Aarch64KvmRegister::new(0b11, 0b000, 0b0100, 0b0110, 0b000, Access::RW, "ICV_PMR_EL1", "ICC_PMR_EL1"),
@@ -415,12 +416,12 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b011, 0b0000, 0b0000, 0b111, Access::RO, "DCZID_EL0", "DCZID_EL0"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b0010, 0b0100, 0b000, Access::RO, "RNDR", "RNDR"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b0010, 0b0100, 0b001, Access::RO, "RNDRRS", "RNDRRS"),
-    // 11 011 0100 0010 000 - NZCV -
-    // 11 011 0100 0010 001 - DAIF -
-    // 11 011 0100 0010 010 - SVCR -
-    // 11 011 0100 0010 101 - DIT -
-    // 11 011 0100 0010 110 - SSBS -
-    // 11 011 0100 0010 111 - TCO -
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b000, Access::Unspecified, "NZCV", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b001, Access::Unspecified, "DAIF", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b010, Access::Unspecified, "SVCR", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b101, Access::Unspecified, "DIT", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b110, Access::Unspecified, "SSBS", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0010, 0b111, Access::Unspecified, "TCO", "-"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0100, 0b000, Access::RW, "FPCR", "FPCR"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0100, 0b001, Access::RW, "FPSR", "FPSR"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b0100, 0b0101, 0b000, Access::RW, "DSPSR_EL0", "DSPSR_EL0"),
@@ -457,13 +458,13 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     // 11 011 1101 110:m[3] m[2:0] RW AMEVCNTR1<n>_EL0 AMEVCNTR1_EL0[]
     // 11 011 1101 111:m[3] m[2:0] RW AMEVTYPER1<n>_EL0 AMEVTYPER1_EL0[]
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0000, 0b000, Access::RW, "CNTFRQ_EL0", "CNTFRQ_EL0"),
-    // 11 011 1110 0000 001 - CNTPCT_EL0 -
-    // 11 011 1110 0000 010 - CNTVCT_EL0 -
-    // 11 011 1110 0000 101 - CNTPCTSS_EL0 -
-    // 11 011 1110 0000 110 - CNTVCTSS_EL0 -
-    // 11 011 1110 0010 000 - CNTHP_TVAL_EL2 -
-    // 11 011 1110 0010 000 - CNTHPS_TVAL_EL2 -
-    // 11 011 1110 0010 000 - CNTP_TVAL_EL0 -
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0000, 0b001, Access::Unspecified, "CNTPCT_EL0", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0000, 0b010, Access::Unspecified, "CNTVCT_EL0", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0000, 0b101, Access::Unspecified, "CNTPCTSS_EL0", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0000, 0b110, Access::Unspecified, "CNTVCTSS_EL0", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTHP_TVAL_EL2", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTHPS_TVAL_EL2", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTP_TVAL_EL0", "-"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b001, Access::RW, "CNTHP_CTL_EL2", "CNTHPS_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b001, Access::RW, "CNTHP_CTL_EL2", "CNTHP_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b001, Access::RW, "CNTHP_CTL_EL2", "CNTP_CTL_EL0"),
@@ -482,9 +483,9 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b010, Access::RW, "CNTP_CVAL_EL0", "CNTHPS_CVAL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b010, Access::RW, "CNTP_CVAL_EL0", "CNTHP_CVAL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0010, 0b010, Access::RW, "CNTP_CVAL_EL0", "CNTP_CVAL_EL0"),
-    // 11 011 1110 0011 000 - CNTHV_TVAL_EL2 -
-    // 11 011 1110 0011 000 - CNTHVS_TVAL_EL2 -
-    // 11 011 1110 0011 000 - CNTV_TVAL_EL0 -
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b000, Access::Unspecified, "CNTHV_TVAL_EL2", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b000, Access::Unspecified, "CNTHVS_TVAL_EL2", "-"),
+    Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b000, Access::Unspecified, "CNTV_TVAL_EL0", "-"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b001, Access::RW, "CNTHV_CTL_EL2", "CNTHVS_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b001, Access::RW, "CNTHV_CTL_EL2", "CNTHV_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b011, 0b1110, 0b0011, 0b001, Access::RW, "CNTHV_CTL_EL2", "CNTV_CTL_EL0"),
@@ -605,16 +606,16 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0000, 0b011, Access::RW, "CNTVOFF_EL2", "CNTVOFF_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0000, 0b110, Access::RW, "CNTPOFF_EL2", "CNTPOFF_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0001, 0b000, Access::RW, "CNTHCTL_EL2", "CNTHCTL_EL2"),
-    // 11 100 1110 0010 000 - CNTHP_TVAL_EL2 -
+    Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTHP_TVAL_EL2", "-"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0010, 0b001, Access::RW, "CNTHP_CTL_EL2", "CNTHP_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0010, 0b010, Access::RW, "CNTHP_CVAL_EL2", "CNTHP_CVAL_EL2"),
-    // 11 100 1110 0011 000 - CNTHV_TVAL_EL2 -
+    Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0011, 0b000, Access::Unspecified, "CNTHV_TVAL_EL2", "-"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0011, 0b001, Access::RW, "CNTHV_CTL_EL2", "CNTHV_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0011, 0b010, Access::RW, "CNTHV_CVAL_EL2", "CNTHV_CVAL_EL2"),
-    // 11 100 1110 0100 000 - CNTHVS_TVAL_EL2 -
+    Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0100, 0b000, Access::Unspecified, "CNTHVS_TVAL_EL2", "-"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0100, 0b001, Access::RW, "CNTHVS_CTL_EL2", "CNTHVS_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0100, 0b010, Access::RW, "CNTHVS_CVAL_EL2", "CNTHVS_CVAL_EL2"),
-    // 11 100 1110 0101 000 - CNTHPS_TVAL_EL2 -
+    Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0101, 0b000, Access::Unspecified, "CNTHPS_TVAL_EL2", "-"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0101, 0b001, Access::RW, "CNTHPS_CTL_EL2", "CNTHPS_CTL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b100, 0b1110, 0b0101, 0b010, Access::RW, "CNTHPS_CVAL_EL2", "CNTHPS_CVAL_EL2"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b0001, 0b0000, 0b000, Access::RW, "SCTLR_EL1", "SCTLR_EL1"),
@@ -640,10 +641,10 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b101, 0b1101, 0b0000, 0b001, Access::RW, "CONTEXTIDR_EL1", "CONTEXTIDR_EL1"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1101, 0b0000, 0b111, Access::RW, "SCXTNUM_EL1", "SCXTNUM_EL1"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0001, 0b000, Access::RW, "CNTKCTL_EL1", "CNTKCTL_EL1"),
-    // 11 101 1110 0010 000 - CNTP_TVAL_EL0 -
+    Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTP_TVAL_EL0", "-"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0010, 0b001, Access::RW, "CNTP_CTL_EL0", "CNTP_CTL_EL0"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0010, 0b010, Access::RW, "CNTP_CVAL_EL0", "CNTP_CVAL_EL0"),
-    // 11 101 1110 0011 000 - CNTV_TVAL_EL0 -
+    Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0011, 0b000, Access::Unspecified, "CNTV_TVAL_EL0", "-"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0011, 0b001, Access::RW, "CNTV_CTL_EL0", "CNTV_CTL_EL0"),
     Aarch64KvmRegister::new(0b11, 0b101, 0b1110, 0b0011, 0b010, Access::RW, "CNTV_CVAL_EL0", "CNTV_CVAL_EL0"),
     Aarch64KvmRegister::new(0b11, 0b110, 0b0001, 0b0000, 0b000, Access::RW, "SCTLR_EL3", "SCTLR_EL3"),
@@ -678,7 +679,7 @@ pub const AARCH64_KVM_REGISTERS: [Aarch64KvmRegister; 525] = [
     Aarch64KvmRegister::new(0b11, 0b110, 0b1100, 0b1100, 0b111, Access::RW, "ICC_IGRPEN1_EL3", "ICC_IGRPEN1_EL3"),
     Aarch64KvmRegister::new(0b11, 0b110, 0b1101, 0b0000, 0b010, Access::RW, "TPIDR_EL3", "TPIDR_EL3"),
     Aarch64KvmRegister::new(0b11, 0b110, 0b1101, 0b0000, 0b111, Access::RW, "SCXTNUM_EL3", "SCXTNUM_EL3"),
-    // 11 111 1110 0010 000 - CNTPS_TVAL_EL1 -
+    Aarch64KvmRegister::new(0b11, 0b111, 0b1110, 0b0010, 0b000, Access::Unspecified, "CNTPS_TVAL_EL1", "-"),
     Aarch64KvmRegister::new(0b11, 0b111, 0b1110, 0b0010, 0b001, Access::RW, "CNTPS_CTL_EL1", "CNTPS_CTL_EL1"),
     Aarch64KvmRegister::new(0b11, 0b111, 0b1110, 0b0010, 0b010, Access::RW, "CNTPS_CVAL_EL1", "CNTPS_CVAL_EL1"),
 ];
