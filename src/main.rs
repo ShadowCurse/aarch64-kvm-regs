@@ -7,6 +7,8 @@ mod mimi_vm;
 
 use arm::AARCH64_KVM_REGISTERS;
 
+use crate::arm::reg_size;
+
 #[derive(Debug, thiserror::Error)]
 enum Error {
     #[error("Can not read file: {0}: {1}")]
@@ -58,67 +60,37 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-fn query() -> Result<(), Error> {
+fn query(values: bool, names: bool, size: bool, hex: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
-    for reg in kvm_vcpu.query_registers()? {
-        println!("{reg}");
-    }
-    Ok(())
-}
-
-fn query_with_values(hex: bool) -> Result<(), Error> {
-    let kvm_vcpu = KvmVcpuWrapper::new()?;
-    if hex {
-        for (reg, val) in kvm_vcpu.query_registers_with_values()? {
-            println!("{reg} {val:#018x}");
-        }
-    } else {
-        for (reg, val) in kvm_vcpu.query_registers_with_values()? {
-            println!("{reg} {val}");
-        }
-    }
-    Ok(())
-}
-
-fn query_with_names() -> Result<(), Error> {
-    let kvm_vcpu = KvmVcpuWrapper::new()?;
-    for reg_id in kvm_vcpu.query_registers()? {
+    for (reg_id, val) in kvm_vcpu.query_registers()? {
+        let reg_size = reg_size(reg_id);
         let regs = AARCH64_KVM_REGISTERS
             .iter()
             .filter(|reg| reg.reg_id == reg_id)
             .collect::<Vec<_>>();
-        if !regs.is_empty() {
-            for reg in regs {
-                println!("{reg_id} {}", reg.register);
+        let print_info = || {
+            print!("{reg_id}");
+            if size {
+                print!("{reg_size}");
             }
-        } else {
-            println!("{reg_id} none");
-        }
-    }
-    Ok(())
-}
-
-fn query_with_values_and_names(hex: bool) -> Result<(), Error> {
-    let kvm_vcpu = KvmVcpuWrapper::new()?;
-    for (reg_id, val) in kvm_vcpu.query_registers_with_values()? {
-        let regs = AARCH64_KVM_REGISTERS
-            .iter()
-            .filter(|reg| reg.reg_id == reg_id)
-            .collect::<Vec<_>>();
-        if hex {
-            if !regs.is_empty() {
-                for reg in regs {
-                    println!("{reg_id} {val:#018x} {}", reg.register);
+            if values {
+                if hex {
+                    print!("{val:#018x}");
+                } else {
+                    print!("{val}");
                 }
-            } else {
-                println!("{reg_id} {val:#018x} none");
             }
-        } else if !regs.is_empty() {
-            for reg in regs {
-                println!("{reg_id} {val} {}", reg.register);
-            }
+        };
+        if regs.is_empty() {
+            print_info();
         } else {
-            println!("{reg_id} {val} none");
+            for reg in regs {
+                print_info();
+                if names {
+                    print!("{}", reg.register);
+                }
+                println!();
+            }
         }
     }
     Ok(())
@@ -143,6 +115,8 @@ enum Command {
         values: bool,
         #[arg(short, long)]
         names: bool,
+        #[arg(short, long)]
+        size: bool,
         #[arg(long)]
         hex: bool,
     },
@@ -162,12 +136,12 @@ fn main() -> Result<(), Error> {
             FindMode::Id => find_by_id(path)?,
             FindMode::Register => find_by_register(path)?,
         },
-        Command::Query { values, names, hex } => match (values, names) {
-            (false, false) => query()?,
-            (true, false) => query_with_values(hex)?,
-            (false, true) => query_with_names()?,
-            (true, true) => query_with_values_and_names(hex)?,
-        },
+        Command::Query {
+            values,
+            names,
+            size,
+            hex,
+        } => query(values, names, size, hex)?,
     }
 
     Ok(())

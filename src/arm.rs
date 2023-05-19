@@ -1,5 +1,12 @@
 use std::fmt::Display;
 
+pub const KVM_REG_SIZE_SHIFT: u32 = 52;
+pub const KVM_REG_SIZE_MASK: u64 = 67553994410557440;
+
+pub fn reg_size(reg_id: u64) -> usize {
+    2_usize.pow(((reg_id & KVM_REG_SIZE_MASK) >> KVM_REG_SIZE_SHIFT) as u32)
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Access {
     RW,
