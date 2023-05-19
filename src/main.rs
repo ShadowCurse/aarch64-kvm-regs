@@ -60,7 +60,7 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-fn query(values: bool, names: bool, size: bool, hex: bool) -> Result<(), Error> {
+fn query(value: bool, name: bool, size: bool, hex: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
     for (reg_id, val) in kvm_vcpu.query_registers()? {
         let reg_size = reg_size(reg_id);
@@ -73,7 +73,7 @@ fn query(values: bool, names: bool, size: bool, hex: bool) -> Result<(), Error> 
             if size {
                 print!(" {reg_size} ");
             }
-            if values {
+            if value {
                 if hex {
                     print!(" {val:#018x} ");
                 } else {
@@ -87,7 +87,7 @@ fn query(values: bool, names: bool, size: bool, hex: bool) -> Result<(), Error> 
         } else {
             for reg in regs {
                 print_info();
-                if names {
+                if name {
                     print!(" {} ", reg.register);
                 }
                 println!();
@@ -113,9 +113,9 @@ enum Command {
     },
     Query {
         #[arg(short, long)]
-        values: bool,
+        value: bool,
         #[arg(short, long)]
-        names: bool,
+        name: bool,
         #[arg(short, long)]
         size: bool,
         #[arg(long)]
@@ -138,11 +138,11 @@ fn main() -> Result<(), Error> {
             FindMode::Register => find_by_register(path)?,
         },
         Command::Query {
-            values,
-            names,
+            value,
+            name,
             size,
             hex,
-        } => query(values, names, size, hex)?,
+        } => query(value, name, size, hex)?,
     }
 
     Ok(())

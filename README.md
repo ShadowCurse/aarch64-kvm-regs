@@ -22,7 +22,8 @@ Takes file with register id/name on each row.
 ### `Query`
 Creates basic KVM vm and queries all available registers from it.
 Options:
-- `values` - adds register value in decimal to the output
-- `names` - adds register name to the output 
-- `hex` - if `values` is specified then they will be printed in hex 
+- `value` - adds register value in decimal to the output
+- `name` - adds register name to the output 
+- `size` - adds register size in bits to the output 
+- `hex` - if `value` is specified then they will be printed in hex 
 
