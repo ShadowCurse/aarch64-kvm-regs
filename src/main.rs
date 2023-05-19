@@ -69,25 +69,26 @@ fn query(values: bool, names: bool, size: bool, hex: bool) -> Result<(), Error> 
             .filter(|reg| reg.reg_id == reg_id)
             .collect::<Vec<_>>();
         let print_info = || {
-            print!("{reg_id}");
+            print!(" {reg_id} ");
             if size {
-                print!("{reg_size}");
+                print!(" {reg_size} ");
             }
             if values {
                 if hex {
-                    print!("{val:#018x}");
+                    print!(" {val:#018x} ");
                 } else {
-                    print!("{val}");
+                    print!(" {val} ");
                 }
             }
         };
         if regs.is_empty() {
             print_info();
+            println!();
         } else {
             for reg in regs {
                 print_info();
                 if names {
-                    print!("{}", reg.register);
+                    print!(" {} ", reg.register);
                 }
                 println!();
             }
