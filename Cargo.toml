@@ -3,10 +3,16 @@ name = "aarch64-kvm-regs"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "parse_reg_info"
+path = "bin/parse_reg_info.rs"
 
 [dependencies]
+serde = { version = "1.0.195", features = ["derive"] }
 clap = { version = "4.1.8", features = ["derive"] }
 kvm-bindings = "0.7.0"
+serde_json = "1.0.111"
 kvm-ioctls = "0.16.0"
 thiserror = "1.0.39"
+quick-xml = "0.31"
+
