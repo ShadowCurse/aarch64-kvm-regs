@@ -6,24 +6,45 @@ Tool to find info about cpu registers available in KVM on aach64.
 $ cargo build --release
 ```
 
-## Usage
+There are 2 binaries: 
+- `kvm_regs`
+- `parse_reg_info`
 
-There are 2 modes: 
-- `find`
-- `query`
+## `kvm_regs`
+This is used to query KVM registers and print their info.
 
-### `Find`
-Finds the info about the KVM registers.
-Has 2 modes:
-- `id` - finds register based on its id
-- `register` - finds register based on its name
-Takes file with register id/name on each row.
+### Usage
+```bash
+Usage: kvm_regs [OPTIONS]
 
-### `Query`
-Creates basic KVM vm and queries all available registers from it.
 Options:
-- `value` - adds register value in decimal to the output
-- `name` - adds register name to the output 
-- `size` - adds register size in bits to the output 
-- `hex` - if `value` is specified then they will be printed in hex 
+  -v, --value
+  -s, --size
+  -n, --name-file-path <NAME_FILE_PATH>
+  -h, --help                             Print help
+```
 
+Example
+```bash
+$ kvm_regs -v -s -n regs_info.json
+```
+
+## `parse_reg_info`
+This is used to parse `.xml` files from ARM documentation.
+The documentation can be found [here](https://developer.arm.com/downloads/-/exploration-tools)
+just download `XML` archive and unpack.
+
+### Usage
+```bash
+Usage: parse_reg_info --xml-root-path <XML_ROOT_PATH> --output-path <OUTPUT_PATH>
+
+Options:
+  -x, --xml-root-path <XML_ROOT_PATH>
+  -o, --output-path <OUTPUT_PATH>
+  -h, --help                           Print help
+```
+
+Example
+```bash
+$ parse_reg_info -x ./SysReg_xml_A_profile-2023-12/ -o out.json
+```
