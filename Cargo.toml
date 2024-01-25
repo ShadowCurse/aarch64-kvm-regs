@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.1.8", features = ["derive"] }
-kvm-bindings = "0.6.0"
-kvm-ioctls = "0.13.0"
+kvm-bindings = "0.7.0"
+kvm-ioctls = "0.16.0"
 thiserror = "1.0.39"

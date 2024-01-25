@@ -37,7 +37,7 @@ impl KvmVcpuWrapper {
         Ok(Self { kvm, vm, vcpu })
     }
 
-    pub fn query_registers(&self) -> Result<Vec<(u64, u128)>, Error> {
+    pub fn query_registers(&self) -> Result<Vec<(u64, [u8; 2048])>, Error> {
         let mut reg_list = RegList::new(Self::REGISTERS_TO_QUERY).unwrap();
         let reg_list = match self.vcpu.get_reg_list(&mut reg_list) {
             Ok(_) => reg_list.as_slice(),
@@ -54,7 +54,11 @@ impl KvmVcpuWrapper {
 
         let ret = reg_list
             .iter()
-            .map(|reg_id| (*reg_id, self.vcpu.get_one_reg(*reg_id).unwrap()))
+            .map(|reg_id| {
+                let mut reg_buf = [0u8; 2048];
+                self.vcpu.get_one_reg(*reg_id, &mut reg_buf).unwrap();
+                (*reg_id, reg_buf)
+            })
             .collect();
 
         Ok(ret)

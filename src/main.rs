@@ -60,9 +60,9 @@ fn find_by_register(path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-fn query(value: bool, name: bool, size: bool, hex: bool) -> Result<(), Error> {
+fn query(value: bool, name: bool, size: bool) -> Result<(), Error> {
     let kvm_vcpu = KvmVcpuWrapper::new()?;
-    for (reg_id, val) in kvm_vcpu.query_registers()? {
+    for (reg_id, reg_value) in kvm_vcpu.query_registers()? {
         let reg_size = reg_size(reg_id);
         let regs = AARCH64_KVM_REGISTERS
             .iter()
@@ -74,11 +74,20 @@ fn query(value: bool, name: bool, size: bool, hex: bool) -> Result<(), Error> {
                 print!(" {reg_size} ");
             }
             if value {
-                if hex {
-                    print!(" {val:#018x} ");
+                let v = if let Some(p) = reg_value.iter().rev().position(|v| v != &0) {
+                    &reg_value[..(reg_value.len() - p)]
                 } else {
-                    print!(" {val} ");
-                }
+                    // all are zeros
+                    &reg_value[..1]
+                };
+                print!(
+                    "0x{}",
+                    v.iter().rev().fold(String::new(), |mut output, b| {
+                        use std::fmt::Write;
+                        let _ = write!(output, "{b:x}");
+                        output
+                    })
+                );
             }
         };
         if regs.is_empty() {
@@ -118,8 +127,6 @@ enum Command {
         name: bool,
         #[arg(short, long)]
         size: bool,
-        #[arg(long)]
-        hex: bool,
     },
 }
 
@@ -137,12 +144,7 @@ fn main() -> Result<(), Error> {
             FindMode::Id => find_by_id(path)?,
             FindMode::Register => find_by_register(path)?,
         },
-        Command::Query {
-            value,
-            name,
-            size,
-            hex,
-        } => query(value, name, size, hex)?,
+        Command::Query { value, name, size } => query(value, name, size)?,
     }
 
     Ok(())
