@@ -69,9 +69,9 @@ fn query(value: bool, name: bool, size: bool) -> Result<(), Error> {
             .filter(|reg| reg.reg_id == reg_id)
             .collect::<Vec<_>>();
         let print_info = || {
-            print!(" {reg_id} ");
+            print!("{reg_id:#x}");
             if size {
-                print!(" {reg_size} ");
+                print!(" {reg_size}");
             }
             if value {
                 let v = if let Some(p) = reg_value.iter().rev().position(|v| v != &0) {
@@ -81,7 +81,7 @@ fn query(value: bool, name: bool, size: bool) -> Result<(), Error> {
                     &reg_value[..1]
                 };
                 print!(
-                    "0x{}",
+                    " 0x{}",
                     v.iter().rev().fold(String::new(), |mut output, b| {
                         use std::fmt::Write;
                         let _ = write!(output, "{b:x}");
@@ -97,7 +97,7 @@ fn query(value: bool, name: bool, size: bool) -> Result<(), Error> {
             for reg in regs {
                 print_info();
                 if name {
-                    print!(" {} ", reg.register);
+                    print!(" {}", reg.register);
                 }
                 println!();
             }
