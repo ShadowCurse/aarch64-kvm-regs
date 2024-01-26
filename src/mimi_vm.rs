@@ -11,6 +11,8 @@ pub enum Error {
     CreateVcpu(kvm_ioctls::Error),
     #[error("Can not init vcpu: {0}")]
     InitVcpu(kvm_ioctls::Error),
+    #[error("Can not finalize vcpu: {0}")]
+    FinalizeVcpu(kvm_ioctls::Error),
     #[error("Can not get reg list: {0}")]
     GetRegList(kvm_ioctls::Error),
 }
@@ -30,9 +32,21 @@ impl KvmVcpuWrapper {
         let vm = kvm.create_vm().map_err(Error::CreateVm)?;
         let vcpu = vm.create_vcpu(0).map_err(Error::CreateVcpu)?;
 
+        let has_sve = vm.check_extension(Cap::ArmSve);
+
         let mut kvi = kvm_bindings::kvm_vcpu_init::default();
         vm.get_preferred_target(&mut kvi).unwrap();
+
+        if has_sve {
+            kvi.features[0] |= 1 << kvm_bindings::KVM_ARM_VCPU_SVE;
+        }
+
         vcpu.vcpu_init(&kvi).map_err(Error::InitVcpu)?;
+
+        if has_sve {
+            let sve = kvm_bindings::KVM_ARM_VCPU_SVE as i32;
+            vcpu.vcpu_finalize(&sve).map_err(Error::FinalizeVcpu)?;
+        }
 
         Ok(Self { kvm, vm, vcpu })
     }
