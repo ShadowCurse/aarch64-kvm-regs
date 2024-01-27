@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "kvm_regs"
+path = "bin/kvm_regs.rs"
+
+[[bin]]
 name = "parse_reg_info"
 path = "bin/parse_reg_info.rs"
 
