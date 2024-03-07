@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use aarch64_kvm_regs::{
     arm::{reg_size, Aarch64KvmRegister},
-    mimi_vm::{self, KvmVcpuWrapper},
+    mini_vm::{self, KvmVcpuWrapper},
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -13,7 +13,7 @@ enum Error {
     #[error("Can not parse file with reg names: {0}")]
     ParseFile(serde_json::Error),
     #[error("Kvm error: {0}")]
-    Kvm(#[from] mimi_vm::Error),
+    Kvm(#[from] mini_vm::Error),
 }
 
 #[derive(Parser)]

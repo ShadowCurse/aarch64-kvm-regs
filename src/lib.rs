@@ -1,2 +1,2 @@
 pub mod arm;
-pub mod mimi_vm;
+pub mod mini_vm;
