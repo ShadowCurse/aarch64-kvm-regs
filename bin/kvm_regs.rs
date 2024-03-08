@@ -57,7 +57,7 @@ fn main() -> Result<(), Error> {
                 " 0x{}",
                 v.iter().rev().fold(String::new(), |mut output, b| {
                     use std::fmt::Write;
-                    let _ = write!(output, "{b:x}");
+                    let _ = write!(output, "{b:02x}");
                     output
                 })
             );
